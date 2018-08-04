@@ -15,9 +15,11 @@ import {
   DropdownMenu,
   DropdownItem
 } from 'reactstrap';
-import './App.scss';
+import './App.css';
 import mwLightLogo from './images/MarkWikiLightLogo240x120.png';
+import mwDarkLogo from './images/MarkWikiDarkLogo240x120.png';
 import githubLightLogo from './images/GitHub-Mark-32px.png';
+import githubDarkLogo from './images/GitHub-Mark-Light-32px.png';
 
 class App extends Component {
   constructor(props) {
@@ -30,7 +32,8 @@ class App extends Component {
   }
   toggle() {
     this.setState({
-      isOpen: !this.state.isOpen
+      isOpen: !this.state.isOpen,
+      isLight: false
     });
   }
   render() {
@@ -38,10 +41,15 @@ class App extends Component {
       <div>
         <Helmet title="MarkWiki" />
         <div>
-          <Navbar color="light" light expand="md">
+          <Navbar
+            color={this.state.isLight ? 'light' : 'dark'}
+            light={this.state.isLight}
+            dark={!this.state.isLight}
+            expand="md"
+          >
             <NavbarBrand href="/">
               <img
-                src={mwLightLogo}
+                src={this.state.isLight ? mwLightLogo : mwDarkLogo}
                 height={32}
                 alt="MarkWiki Logo"
                 title="MarkWiki"
@@ -51,23 +59,17 @@ class App extends Component {
             <Collapse isOpen={this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
                 <NavItem>
-                  <NavLink href="/components/">Components</NavLink>
+                  <NavLink href="/login/">Login</NavLink>
                 </NavItem>
-                <UncontrolledDropdown nav inNavbar>
-                  <DropdownToggle nav caret>
-                    Options
-                  </DropdownToggle>
-                  <DropdownMenu right>
-                    <DropdownItem>Option 1</DropdownItem>
-                    <DropdownItem>Option 2</DropdownItem>
-                    <DropdownItem divider />
-                    <DropdownItem>Reset</DropdownItem>
-                  </DropdownMenu>
-                </UncontrolledDropdown>
+                <NavItem>
+                  <NavLink href="/register/">Register</NavLink>
+                </NavItem>
                 <NavItem>
                   <NavLink href="https://github.com/MarkWiki">
                     <img
-                      src={githubLightLogo}
+                      src={
+                        this.state.isLight ? githubLightLogo : githubDarkLogo
+                      }
                       height={24}
                       alt="MarkWiki's GitHub"
                       title="MarkWiki's GitHub"

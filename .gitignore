@@ -6,6 +6,9 @@
 # production
 /build
 
+# Remove CSS (leave only SCSS)
+src/**/*.css
+
 ### --------- ###
 
 # Created by https://www.gitignore.io/api/web,node,macos,webstorm,visualstudio,visualstudiocode
