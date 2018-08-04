@@ -30,3 +30,29 @@ The build is minified and the filenames include the hashes.<br>
 Your app is ready to be deployed!
 
 See the section about [deployment](#deployment) for more information.
+
+## Roadmap (v1)
+
+General
+
+- [ ] GitHub integration
+- [ ] Markdown rendering
+- [ ] Multiple Wikis
+- [ ] Browser
+- [ ] Online editing
+- [ ] History
+- [ ] Attachments
+- [ ] Versioning
+- [ ] Browser - reordering/moving pages and files
+
+Customization
+
+- [ ] Custom sub-domains
+- [ ] Custom domains
+- [ ] Custom stylesheets
+
+Templates
+
+- [ ] Templates
+- [ ] Custom templates
+- [ ] Processes
