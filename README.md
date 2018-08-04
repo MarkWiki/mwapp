@@ -1,6 +1,10 @@
 ![MarkWiki App Logo](/resources/MarkWikiAppLightLogo.png)
 
-----
+---
+
+| Stage  | Status                                                                                                          |
+| ------ | --------------------------------------------------------------------------------------------------------------- |
+| master | [![Build Status](https://travis-ci.org/MarkWiki/mwapp.svg?branch=master)](https://travis-ci.org/MarkWiki/mwapp) |
 
 ## Development
 
