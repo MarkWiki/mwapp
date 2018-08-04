@@ -17,6 +17,20 @@ import mwDarkLogo from './images/MarkWikiDarkLogo240x120.png';
 import githubLightLogo from './images/GitHub-Mark-32px.png';
 import githubDarkLogo from './images/GitHub-Mark-Light-32px.png';
 
+function navigateOauthGitHub() {
+  const state = '123';
+  const currentUrl = window.location.href;
+  const scopes = 'user,public_repo';
+  const clientId = '815b10ee06332853b128';
+  const redirectUrl = 'https://markwiki.com/login/github';
+  const newLocation = `https://github.com/login/oauth/authorize?client_id=${encodeURI(
+    clientId
+  )}&redirect_uri=${encodeURI(redirectUrl)}&scope=${encodeURI(
+    scopes
+  )}&state=${encodeURI(state)}`;
+  window.location = newLocation;
+}
+
 class App extends Component {
   constructor(props) {
     super(props);
