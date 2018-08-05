@@ -140,7 +140,9 @@ AuthService.instance = new AuthService();
 
 class LoginGitHubPage extends Component {
   render() {
-    const { from } = this.props.location.state || { from: { pathname: '/' } };
+    const { from } = (this.props.location && this.props.location.state) || {
+      from: { pathname: '/' }
+    };
     AuthService.navigateOauthGitHub(from.pathname);
 
     return (
@@ -170,7 +172,11 @@ class LoginGitHubResponsePage extends Component {
   render() {
     const code = getQueryVariable('code') || null;
     const state = getQueryVariable('state') || null;
-    AuthService.loginCodeGitHubAsync(code, state);
+    try {
+      AuthService.loginCodeGitHubAsync(code, state);
+    } catch (error) {
+      console.warn('Failed to login.', error);
+    }
 
     return (
       <div className="pt-5">
@@ -202,8 +208,12 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 );
 
 const ProfileNavItem = location => {
-  AuthService.instance.tryAuthenticate();
-  GitHubApiService.instance.getUserNameAsync();
+  try {
+    AuthService.instance.tryAuthenticate();
+    GitHubApiService.instance.getUserNameAsync();
+  } catch (error) {
+    console.warn("Couldn't obtain user info.", error);
+  }
 
   return AuthService.instance.isAuthenticated ? (
     <div>Logged in</div>
