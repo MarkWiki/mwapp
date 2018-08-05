@@ -62,12 +62,14 @@ class GitHubApiService {
 
   async getUserNameAsync() {
     console.log('GitHubToken', AuthService.instance.gitHubToken);
-    const response = await this._graphRequest('query { viewer { login } }');
+    const response = await this._graphRequestAsync(
+      'query { viewer { login } }'
+    );
     console.log('getUserName response: ', response);
     return response;
   }
 
-  _graphRequest(query) {
+  _graphRequestAsync(query) {
     return this._getClient().post('/graphql', {
       query
     });
