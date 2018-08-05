@@ -61,12 +61,17 @@ class GitHubApiService {
   static instance;
 
   async getUserNameAsync() {
-    console.log('GitHubToken', AuthService.instance.gitHubToken);
-    const response = await this._graphRequestAsync(
-      'query { viewer { login } }'
-    );
-    console.log('getUserName response: ', response);
-    return response;
+    if (!AuthService.instance.isAuthenticated) return null;
+
+    try {
+      const response = await this._graphRequestAsync(
+        'query { viewer { login } }'
+      );
+      return response;
+    } catch (error) {
+      console.warn('Failed to retrieve graph data.', error);
+      return null;
+    }
   }
 
   _graphRequestAsync(query) {
