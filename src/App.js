@@ -46,11 +46,14 @@ class LandingPage extends Component {
 
 class StorageService {
   static localStorageSet(key, value) {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    if (window.localStorage)
+      window.localStorage.setItem(key, JSON.stringify(value));
   }
 
   static localStorageGet(key) {
-    return JSON.parse(window.localStorage.getItem(key));
+    if (window.localStorage)
+      return JSON.parse(window.localStorage.getItem(key));
+    return null;
   }
 }
 
@@ -199,6 +202,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
 );
 
 const ProfileNavItem = location => {
+  AuthService.instance.tryAuthenticate();
   GitHubApiService.instance.getUserNameAsync();
 
   return AuthService.instance.isAuthenticated ? (
@@ -280,8 +284,6 @@ const routes = [
 
 class App extends Component {
   render() {
-    AuthService.instance.tryAuthenticate();
-
     return (
       <Router>
         <Switch>
