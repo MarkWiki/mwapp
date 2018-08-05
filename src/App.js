@@ -259,16 +259,9 @@ const DefaultLayout = ({
                 title="MarkWiki"
               />
             </NavbarBrand>
-            <NavbarToggler
-              onClick={() =>
-                this.setState({ isOpen: !this.state || !this.state.isOpen })
-              }
-            />
-            <Collapse isOpen={this.state && this.state.isOpen} navbar>
-              <Nav className="ml-auto" navbar>
-                <ProfileNavItem location={matchedProps.location} />
-              </Nav>
-            </Collapse>
+            <Nav className="ml-auto" navbar>
+              <ProfileNavItem location={matchedProps.location} />
+            </Nav>
           </Navbar>
         </div>
         <Component {...matchedProps} />
