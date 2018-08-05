@@ -1,205 +1,18 @@
-import axios from 'axios';
-import Helmet from 'react-helmet';
-import React, { Component } from 'react';
-import {
-  Alert,
-  Button,
-  Jumbotron,
-  Navbar,
-  NavbarBrand,
-  Nav,
-  NavItem,
-  NavLink
-} from 'reactstrap';
+import React from 'react';
 import {
   BrowserRouter as Router,
   Redirect,
   Route,
-  Switch,
-  Link
+  Switch
 } from 'react-router-dom';
+import { observer } from 'mobx-react';
+import AuthService from './services/AuthService';
+import DefaultLayout from './pages/layouts/DefaultLayout';
+import LoginGitHubResponsePage from './pages/LoginGitHubResponsePage';
+import LoginGitHubPage from './pages/LoginGitHubPage';
 import './App.css';
-import { version } from '../package.json';
-import mwLightLogo from './images/MarkWikiLightLogo240x120.png';
-import gitHubLogoLightLarge from './images/GitHub-Mark-120px-plus.png';
 
-class LandingPage extends Component {
-  render() {
-    return (
-      <Jumbotron>
-        <h1 className="display-3">Hello, world!</h1>
-        <p className="lead">
-          Welcome to MarkWiki{' '}
-          <span role="img" aria-label="wave">
-            👋
-          </span>
-        </p>
-        <hr className="my-2" />
-        <p>Markdown + Wiki + Version Control</p>
-        <p className="lead">
-          <Button color="secondary">Start using</Button>
-        </p>
-      </Jumbotron>
-    );
-  }
-}
-
-class StorageService {
-  static localStorageSet(key, value) {
-    if (!window.localStorage) return;
-
-    if (value == null) window.localStorage.removeItem(key);
-    else window.localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  static localStorageGet(key) {
-    if (!window.localStorage) return null;
-
-    const item = window.localStorage.getItem(key);
-    if (item != null) return JSON.parse(item);
-    return null;
-  }
-}
-
-class GitHubApiService {
-  static instance;
-
-  async getUserNameAsync() {
-    if (!AuthService.instance.isAuthenticated) return null;
-
-    try {
-      const response = await this._graphRequestAsync(
-        'query { viewer { login } }'
-      );
-      return response;
-    } catch (error) {
-      console.warn('Failed to retrieve graph data.', error);
-      return null;
-    }
-  }
-
-  _graphRequestAsync(query) {
-    return this._getClient().post('/graphql', {
-      query
-    });
-  }
-
-  _getClient() {
-    return axios.create({
-      baseURL: 'https://api.github.com/',
-      timeout: 1000,
-      headers: {
-        Authorization: `bearer ${AuthService.instance.gitHubToken}`
-      }
-    });
-  }
-}
-
-GitHubApiService.instance = new GitHubApiService();
-
-class AuthService {
-  static instance;
-
-  isAuthenticated = false;
-  gitHubToken = null;
-
-  tryAuthenticate() {
-    this.gitHubToken = StorageService.localStorageGet('gitHubToken');
-    this.isAuthenticated = this.gitHubToken != null;
-  }
-
-  static navigateOauthGitHub(fromPathname) {
-    const state = new Date().getTime();
-    const scopes = 'user,public_repo';
-    const clientId = '815b10ee06332853b128';
-    const redirectUrl = 'https://markwiki.com/login/github';
-    const newLocation = `https://github.com/login/oauth/authorize?client_id=${encodeURI(
-      clientId
-    )}&redirect_uri=${encodeURI(redirectUrl)}&scope=${encodeURI(
-      scopes
-    )}&state=${encodeURI(state)}`;
-
-    // Save return state
-    StorageService.localStorageSet('loginGitHubSourceUrl', fromPathname);
-    StorageService.localStorageSet('loginGitHubNonce', state);
-
-    window.location = newLocation;
-  }
-
-  static async loginCodeGitHubAsync(code, state) {
-    const redirectUrl =
-      StorageService.localStorageGet('loginGitHubSourceUrl') || '/';
-    const checkNonce = StorageService.localStorageGet(
-      'loginGitHubNonce'
-    ).toString();
-
-    if (checkNonce !== state) {
-      throw new Error('Login GitHub: Nonce not matching.');
-    }
-
-    const response = await axios.get(
-      `https://dqdzhooyx3.execute-api.eu-central-1.amazonaws.com/dev/token/github?code=${code}`
-    );
-    const accessToken = response.data.access_token;
-
-    StorageService.localStorageSet('gitHubToken', accessToken);
-
-    window.location = redirectUrl;
-  }
-}
-
-AuthService.instance = new AuthService();
-
-class LoginGitHubPage extends Component {
-  render() {
-    const { from } = (this.props.location && this.props.location.state) || {
-      from: { pathname: '/' }
-    };
-    AuthService.navigateOauthGitHub(from.pathname);
-
-    return (
-      <div className="pt-5">
-        <div className="text-center">
-          <img src={gitHubLogoLightLarge} alt="GitHub Mark" />
-          <div className="pt-4">Redirecting to GitHub...</div>
-        </div>
-      </div>
-    );
-  }
-}
-
-function getQueryVariable(variable) {
-  var query = window.location.search.substring(1);
-  var vars = query.split('&');
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split('=');
-    if (decodeURIComponent(pair[0]) === variable) {
-      return decodeURIComponent(pair[1]);
-    }
-  }
-  return null;
-}
-
-class LoginGitHubResponsePage extends Component {
-  render() {
-    const code = getQueryVariable('code') || null;
-    const state = getQueryVariable('state') || null;
-    try {
-      AuthService.loginCodeGitHubAsync(code, state);
-    } catch (error) {
-      console.warn('Failed to login.', error);
-    }
-
-    return (
-      <div className="pt-5">
-        <div className="text-center">
-          <img src={gitHubLogoLightLarge} alt="GitHub Mark" />
-          <div className="pt-4">Logging you in...</div>
-        </div>
-      </div>
-    );
-  }
-}
+import LandingPage from './pages/LandingPage';
 
 const PrivateRoute = ({ component: Component, ...rest }) => (
   <Route
@@ -216,71 +29,6 @@ const PrivateRoute = ({ component: Component, ...rest }) => (
         />
       )
     }
-  />
-);
-
-const ProfileNavItem = location => {
-  try {
-    AuthService.instance.tryAuthenticate();
-    GitHubApiService.instance.getUserNameAsync();
-  } catch (error) {
-    console.warn("Couldn't obtain user info.", error);
-  }
-
-  return AuthService.instance.isAuthenticated ? (
-    <div>Logged in</div>
-  ) : (
-    <NavItem>
-      <NavLink
-        tag={Link}
-        to={{
-          pathname: '/login',
-          state: { from: location }
-        }}
-      >
-        Login with GitHub
-      </NavLink>
-    </NavItem>
-  );
-};
-
-const DefaultLayout = ({
-  baseRoute: BaseRoute,
-  component: Component,
-  ...rest
-}) => (
-  <BaseRoute
-    {...rest}
-    component={matchedProps => (
-      <div>
-        <Helmet title="MarkWiki" />
-        <div>
-          <Navbar color="light" light expand="md">
-            <NavbarBrand href="/">
-              <img
-                src={mwLightLogo}
-                height={32}
-                alt="MarkWiki Logo"
-                title="MarkWiki"
-              />
-            </NavbarBrand>
-            <Nav className="ml-auto" navbar>
-              <ProfileNavItem location={matchedProps.location} />
-            </Nav>
-          </Navbar>
-        </div>
-        <Alert
-          color="primary"
-          className="mb-0 alert-no-border-radius"
-          fade={false}
-        >
-          MarkWiki is still in development. Please don't use it in production
-          environments.
-        </Alert>
-        <Component {...matchedProps} />
-        <small className="text-muted pl-1">MarkWiki v{version}</small>
-      </div>
-    )}
   />
 );
 
@@ -306,7 +54,7 @@ const routes = [
   }
 ];
 
-class App extends Component {
+class App extends React.Component {
   render() {
     return (
       <Router>
@@ -326,4 +74,4 @@ class App extends Component {
   }
 }
 
-export default App;
+export default observer(App);
