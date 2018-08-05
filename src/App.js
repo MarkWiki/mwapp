@@ -2,6 +2,7 @@ import axios from 'axios';
 import Helmet from 'react-helmet';
 import React, { Component } from 'react';
 import {
+  Alert,
   Button,
   Jumbotron,
   Navbar,
@@ -18,6 +19,7 @@ import {
   Link
 } from 'react-router-dom';
 import './App.css';
+import { version } from '../package.json';
 import mwLightLogo from './images/MarkWikiLightLogo240x120.png';
 import gitHubLogoLightLarge from './images/GitHub-Mark-120px-plus.png';
 
@@ -262,7 +264,16 @@ const DefaultLayout = ({
             </Nav>
           </Navbar>
         </div>
+        <Alert
+          color="primary"
+          className="mb-0 alert-no-border-radius"
+          fade={false}
+        >
+          MarkWiki is still in development. Please don't use it in production
+          environments.
+        </Alert>
         <Component {...matchedProps} />
+        <small className="text-muted pl-1">MarkWiki v{version}</small>
       </div>
     )}
   />
