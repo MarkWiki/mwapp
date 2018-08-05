@@ -17,19 +17,73 @@ import mwDarkLogo from './images/MarkWikiDarkLogo240x120.png';
 import githubLightLogo from './images/GitHub-Mark-32px.png';
 import githubDarkLogo from './images/GitHub-Mark-Light-32px.png';
 
-function navigateOauthGitHub() {
-  const state = '123';
-  const currentUrl = window.location.href;
-  const scopes = 'user,public_repo';
-  const clientId = '815b10ee06332853b128';
-  const redirectUrl = 'https://markwiki.com/login/github';
-  const newLocation = `https://github.com/login/oauth/authorize?client_id=${encodeURI(
-    clientId
-  )}&redirect_uri=${encodeURI(redirectUrl)}&scope=${encodeURI(
-    scopes
-  )}&state=${encodeURI(state)}`;
-  window.location = newLocation;
+class LandingPage extends Component {
+  render() {
+    return <div>Landing</div>;
+  }
 }
+
+class StorageService {
+  static localStorageSet(key, value) {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  }
+
+  static localStorageGet(key) {
+    return JSON.parse(window.localStorage.getItem(key));
+  }
+}
+
+class AuthService {
+  static navigateOauthGitHub() {
+    const currentUrl = window.location.href;
+    const state = new Date().getTime();
+    const scopes = 'user,public_repo';
+    const clientId = '815b10ee06332853b128';
+    const redirectUrl = 'https://markwiki.com/login/github';
+    const newLocation = `https://github.com/login/oauth/authorize?client_id=${encodeURI(
+      clientId
+    )}&redirect_uri=${encodeURI(redirectUrl)}&scope=${encodeURI(
+      scopes
+    )}&state=${encodeURI(state)}`;
+
+    // Save return state
+    StorageService.localStorageSet('loginGitHubSourceUrl', currentUrl);
+    StorageService.localStorageSet('loginGitHubNonce', state);
+
+    window.location = newLocation;
+  }
+
+  static loginCodeGitHub(code, state) {
+    const redirectUrl = StorageService.localStorageGet('loginGitHubSourceUrl');
+    const checkNonce = StorageService.localStorageGet('loginGitHubNonce');
+
+    StorageService.localStorageSet('gitHubToken', code);
+
+    if (checkNonce !== state) {
+      throw new Error('Login GitHub: Nonce not matching.');
+    }
+
+    window.location = redirectUrl;
+  }
+}
+
+class ProfilePage extends Component {
+  render() {
+    return <div>Login</div>;
+  }
+}
+
+const routes = [
+  {
+    path: '/',
+    exact: true,
+    component: LandingPage
+  },
+  {
+    path: '/login',
+    component: ProfilePage
+  }
+];
 
 class App extends Component {
   constructor(props) {
