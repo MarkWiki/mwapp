@@ -1,3 +1,4 @@
+import axios from 'axios';
 import Helmet from 'react-helmet';
 import React, { Component } from 'react';
 import {
@@ -11,15 +12,35 @@ import {
   NavItem,
   NavLink
 } from 'reactstrap';
+import {
+  BrowserRouter as Router,
+  Redirect,
+  Route,
+  Switch,
+  Link
+} from 'react-router-dom';
 import './App.css';
 import mwLightLogo from './images/MarkWikiLightLogo240x120.png';
-import mwDarkLogo from './images/MarkWikiDarkLogo240x120.png';
-import githubLightLogo from './images/GitHub-Mark-32px.png';
-import githubDarkLogo from './images/GitHub-Mark-Light-32px.png';
+import gitHubLogoLightLarge from './images/GitHub-Mark-120px-plus.png';
 
 class LandingPage extends Component {
   render() {
-    return <div>Landing</div>;
+    return (
+      <Jumbotron>
+        <h1 className="display-3">Hello, world!</h1>
+        <p className="lead">
+          Welcome to MarkWiki{' '}
+          <span role="img" aria-label="wave">
+            👋
+          </span>
+        </p>
+        <hr className="my-2" />
+        <p>Markdown + Wiki + Version Control</p>
+        <p className="lead">
+          <Button color="secondary">Start using</Button>
+        </p>
+      </Jumbotron>
+    );
   }
 }
 
@@ -33,9 +54,47 @@ class StorageService {
   }
 }
 
+class GitHubApiService {
+  static instance;
+
+  async getUserNameAsync() {
+    console.log('GitHubToken', AuthService.instance.gitHubToken);
+    const response = this._graphRequest('query { viewer { login } }');
+    console.log('getUserName response: ', response);
+    return response;
+  }
+
+  _graphRequest(query) {
+    return this._getClient().post('/graphql', {
+      query
+    });
+  }
+
+  _getClient() {
+    return axios.create({
+      baseURL: 'https://api.github.com/',
+      timeout: 1000,
+      headers: {
+        Authorization: `bearer ${AuthService.instance.gitHubToken}`
+      }
+    });
+  }
+}
+
+GitHubApiService.instance = new GitHubApiService();
+
 class AuthService {
-  static navigateOauthGitHub() {
-    const currentUrl = window.location.href;
+  static instance;
+
+  isAuthenticated = false;
+  gitHubToken = null;
+
+  tryAuthenticate() {
+    this.gitHubToken = StorageService.localStorageGet('gitHubToken');
+    this.isAuthenticated = this.gitHubToken != null;
+  }
+
+  static navigateOauthGitHub(fromPathname) {
     const state = new Date().getTime();
     const scopes = 'user,public_repo';
     const clientId = '815b10ee06332853b128';
@@ -47,120 +106,196 @@ class AuthService {
     )}&state=${encodeURI(state)}`;
 
     // Save return state
-    StorageService.localStorageSet('loginGitHubSourceUrl', currentUrl);
+    StorageService.localStorageSet('loginGitHubSourceUrl', fromPathname);
     StorageService.localStorageSet('loginGitHubNonce', state);
 
     window.location = newLocation;
   }
 
-  static loginCodeGitHub(code, state) {
+  static async loginCodeGitHubAsync(code, state) {
     const redirectUrl = StorageService.localStorageGet('loginGitHubSourceUrl');
-    const checkNonce = StorageService.localStorageGet('loginGitHubNonce');
-
-    StorageService.localStorageSet('gitHubToken', code);
+    const checkNonce = StorageService.localStorageGet(
+      'loginGitHubNonce'
+    ).toString();
 
     if (checkNonce !== state) {
       throw new Error('Login GitHub: Nonce not matching.');
     }
 
+    const response = await axios.get(
+      `https://dqdzhooyx3.execute-api.eu-central-1.amazonaws.com/dev/token/github?code=${code}`
+    );
+    const accessToken = response.data.access_token;
+
+    StorageService.localStorageSet('gitHubToken', accessToken);
+
     window.location = redirectUrl;
   }
 }
 
-class ProfilePage extends Component {
+AuthService.instance = new AuthService();
+
+class LoginGitHubPage extends Component {
   render() {
-    return <div>Login</div>;
+    const { from } = this.props.location.state || { from: { pathname: '/' } };
+    AuthService.navigateOauthGitHub(from.pathname);
+
+    return (
+      <div className="pt-5">
+        <div className="text-center">
+          <img src={gitHubLogoLightLarge} alt="GitHub Mark" />
+          <div className="pt-4">Redirecting to GitHub...</div>
+        </div>
+      </div>
+    );
   }
 }
 
-const routes = [
-  {
-    path: '/',
-    exact: true,
-    component: LandingPage
-  },
-  {
-    path: '/login',
-    component: ProfilePage
+function getQueryVariable(variable) {
+  var query = window.location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (decodeURIComponent(pair[0]) === variable) {
+      return decodeURIComponent(pair[1]);
+    }
   }
-];
+  return null;
+}
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this.toggle = this.toggle.bind(this);
-    this.state = {
-      isOpen: false
-    };
-  }
-  toggle() {
-    this.setState({
-      isOpen: !this.state.isOpen,
-      isLight: false
-    });
-  }
+class LoginGitHubResponsePage extends Component {
   render() {
+    const code = getQueryVariable('code') || null;
+    const state = getQueryVariable('state') || null;
+    AuthService.loginCodeGitHubAsync(code, state);
+
     return (
+      <div className="pt-5">
+        <div className="text-center">
+          <img src={gitHubLogoLightLarge} alt="GitHub Mark" />
+          <div className="pt-4">Logging you in...</div>
+        </div>
+      </div>
+    );
+  }
+}
+
+const PrivateRoute = ({ component: Component, ...rest }) => (
+  <Route
+    {...rest}
+    render={matchedProps =>
+      AuthService.instance.isAuthenticated ? (
+        <Component {...matchedProps} />
+      ) : (
+        <Redirect
+          to={{
+            pathname: '/login',
+            state: { from: matchedProps.location }
+          }}
+        />
+      )
+    }
+  />
+);
+
+const ProfileNavItem = location => {
+  GitHubApiService.instance.getUserNameAsync();
+
+  return AuthService.instance.isAuthenticated ? (
+    <div>Logged in</div>
+  ) : (
+    <NavItem>
+      <NavLink
+        tag={Link}
+        to={{
+          pathname: '/login',
+          state: { from: location }
+        }}
+      >
+        Login with GitHub
+      </NavLink>
+    </NavItem>
+  );
+};
+
+const DefaultLayout = ({
+  baseRoute: BaseRoute,
+  component: Component,
+  ...rest
+}) => (
+  <BaseRoute
+    {...rest}
+    component={matchedProps => (
       <div>
         <Helmet title="MarkWiki" />
         <div>
-          <Navbar
-            color={this.state.isLight ? 'light' : 'dark'}
-            light={this.state.isLight}
-            dark={!this.state.isLight}
-            expand="md"
-          >
+          <Navbar color="light" light expand="md">
             <NavbarBrand href="/">
               <img
-                src={this.state.isLight ? mwLightLogo : mwDarkLogo}
+                src={mwLightLogo}
                 height={32}
                 alt="MarkWiki Logo"
                 title="MarkWiki"
               />
             </NavbarBrand>
-            <NavbarToggler onClick={this.toggle} />
-            <Collapse isOpen={this.state.isOpen} navbar>
+            <NavbarToggler
+              onClick={() =>
+                this.setState({ isOpen: !this.state || !this.state.isOpen })
+              }
+            />
+            <Collapse isOpen={this.state && this.state.isOpen} navbar>
               <Nav className="ml-auto" navbar>
-                <NavItem>
-                  <NavLink href="/login/">Login</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink href="/register/">Register</NavLink>
-                </NavItem>
-                <NavItem>
-                  <NavLink href="https://github.com/MarkWiki">
-                    <img
-                      src={
-                        this.state.isLight ? githubLightLogo : githubDarkLogo
-                      }
-                      height={24}
-                      alt="MarkWiki's GitHub"
-                      title="MarkWiki's GitHub"
-                    />
-                  </NavLink>
-                </NavItem>
+                <ProfileNavItem location={matchedProps.location} />
               </Nav>
             </Collapse>
           </Navbar>
         </div>
-        <div>
-          <Jumbotron>
-            <h1 className="display-3">Hello, world!</h1>
-            <p className="lead">
-              Welcome to MarkWiki{' '}
-              <span role="img" aria-label="wave">
-                👋
-              </span>
-            </p>
-            <hr className="my-2" />
-            <p>Markdown + Wiki + Version Control</p>
-            <p className="lead">
-              <Button color="secondary">Start using</Button>
-            </p>
-          </Jumbotron>
-        </div>
+        <Component {...matchedProps} />
       </div>
+    )}
+  />
+);
+
+const routes = [
+  {
+    path: '/',
+    exact: true,
+    isPublic: true,
+    main: props => <LandingPage {...props} />,
+    layout: DefaultLayout
+  },
+  {
+    path: '/login/github',
+    isPublic: true,
+    main: props => <LoginGitHubResponsePage {...props} />,
+    layout: DefaultLayout
+  },
+  {
+    path: '/login',
+    isPublic: true,
+    main: props => <LoginGitHubPage {...props} />,
+    layout: DefaultLayout
+  }
+];
+
+class App extends Component {
+  render() {
+    AuthService.instance.tryAuthenticate();
+
+    return (
+      <Router>
+        <Switch>
+          {routes.map(route => (
+            <route.layout
+              baseRoute={route.isPublic ? Route : PrivateRoute}
+              key={route.path}
+              path={route.path}
+              exact={route.exact}
+              component={route.main}
+            />
+          ))}
+        </Switch>
+      </Router>
     );
   }
 }
