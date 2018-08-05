@@ -3,10 +3,8 @@ import Helmet from 'react-helmet';
 import React, { Component } from 'react';
 import {
   Button,
-  Collapse,
   Jumbotron,
   Navbar,
-  NavbarToggler,
   NavbarBrand,
   Nav,
   NavItem,
