@@ -46,13 +46,17 @@ class LandingPage extends Component {
 
 class StorageService {
   static localStorageSet(key, value) {
-    if (window.localStorage)
-      window.localStorage.setItem(key, JSON.stringify(value));
+    if (!window.localStorage) return;
+
+    if (value == null) window.localStorage.removeItem(key);
+    else window.localStorage.setItem(key, JSON.stringify(value));
   }
 
   static localStorageGet(key) {
-    if (window.localStorage)
-      return JSON.parse(window.localStorage.getItem(key));
+    if (!window.localStorage) return null;
+
+    const item = window.localStorage.getItem(key);
+    if (item != null) return JSON.parse(item);
     return null;
   }
 }
@@ -123,7 +127,8 @@ class AuthService {
   }
 
   static async loginCodeGitHubAsync(code, state) {
-    const redirectUrl = StorageService.localStorageGet('loginGitHubSourceUrl');
+    const redirectUrl =
+      StorageService.localStorageGet('loginGitHubSourceUrl') || '/';
     const checkNonce = StorageService.localStorageGet(
       'loginGitHubNonce'
     ).toString();
