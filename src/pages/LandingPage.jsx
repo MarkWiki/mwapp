@@ -1,5 +1,8 @@
 import React from 'react';
 import { Button, Jumbotron } from 'reactstrap';
+import { Link } from 'react-router-dom';
+import classnames from 'classnames';
+import AuthService from '../services/AuthService';
 
 const LandingPage = () => (
   <Jumbotron>
@@ -12,8 +15,15 @@ const LandingPage = () => (
     </p>
     <hr className="my-2" />
     <p>Markdown + Wiki + Version Control</p>
-    <p className="lead">
-      <Button color="secondary">Start using</Button>
+    <p
+      className={classnames(
+        'lead',
+        AuthService.instance.isAuthenticated && 'd-none'
+      )}
+    >
+      <Link to="/login">
+        <Button color="secondary">Start using</Button>
+      </Link>
     </p>
   </Jumbotron>
 );
