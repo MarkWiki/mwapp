@@ -1,6 +1,6 @@
 {
   "name": "mwapp",
-  "version": "0.1.6",
+  "version": "0.1.5",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -28,12 +28,12 @@
   },
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
-    "postcommit-bump-patch": "npm version patch",
+    "postmerge-bump-patch": "npm version patch",
     "precommit-lint": "lint-staged",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "precommit": "npm run precommit-lint",
-    "postcommit": "npm run postcommit-bump-patch",
+    "postmerge": "npm run postmerge-bump-patch",
     "start-js": "react-app-rewired start",
     "start": "npm-run-all -p start-js watch-css",
     "build-js": "react-app-rewired build",
