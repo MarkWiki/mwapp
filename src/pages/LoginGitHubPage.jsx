@@ -6,7 +6,7 @@ import gitHubLogoLightLarge from '../images/GitHub-Mark-120px-plus.png';
 
 const resolveFromPathname = (location) => {
     const state = location && location.state;
-    return (state.from && state.from.pathname) || '/';
+    return (state && state.from && state.from.pathname) || '/';
 };
 
 const LoginGitHubPage = ({ location }) => {
