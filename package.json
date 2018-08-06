@@ -1,6 +1,6 @@
 {
   "name": "mwapp",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -50,6 +50,11 @@
     "src/**/*.{js,jsx,json,css}": [
       "prettier --single-quote --write",
       "git add"
+    ]
+  },
+  "reactSnapshot": {
+    "include": [
+      "/login/github"
     ]
   }
 }
