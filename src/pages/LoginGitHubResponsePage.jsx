@@ -3,11 +3,11 @@ import AuthService from '../services/AuthService';
 import { getQueryVariable } from '../utils/url';
 import gitHubLogoLightLarge from '../images/GitHub-Mark-120px-plus.png';
 
-const applyLoginCode = () => {
+const applyLoginCode = async () => {
     const code = getQueryVariable('code') || null;
     const state = getQueryVariable('state') || null;
     try {
-        AuthService.loginCodeGitHubAsync(code, state);
+        await AuthService.loginCodeGitHubAsync(code, state);
     } catch (error) {
         console.warn('Failed to login.', error);
         window.location = '/';
