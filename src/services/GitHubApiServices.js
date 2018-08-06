@@ -1,3 +1,5 @@
+/* eslint-disable  no-await-in-loop */
+
 import axios from 'axios';
 import AuthService from './AuthService';
 
@@ -6,18 +8,54 @@ class GitHubApiService {
 
     async getUserWikisAsync() {
         try {
-            const currentUserOrganizationsQuery = '{ viewer { organizations(first: 100) { edges { node { login } } } } }';
+            const wikiRepos = [];
 
-            const currentUserOrganizationsResult = await this._graphRequestAsync(currentUserOrganizationsQuery);
-            if (currentUserOrganizationsResult == null) return;
-            console.log(currentUserOrganizationsResult);
-            const organizationsLogins = currentUserOrganizationsResult.data.viewer.organizations.edges.map(edge => edge.node.login);
-            console.log(organizationsLogins);
+            const organizationQuery = '{ viewer { login, repositories(first: 100) { edges { node { id, name, url, defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } }, organizations(first: 100) { edges { node { id, name, url, repositories(first: 100) { edges { node { name, defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } } } } } } }';
+            const result = await this._graphRequestAsync(organizationQuery);
+
+            const repos = [];
+
+            // Process user repos
+            const userRepos = result.data.viewer.repositories.edges;
+            for (let userRepositoryIndex = 0; userRepositoryIndex < userRepos.length; userRepositoryIndex++) {
+                const userRepo = userRepos[userRepositoryIndex];
+                repos.push({ owner: result.data.viewer.login, repo: userRepo });
+            }
+
+            // Process organization repos
+            const organizations = result.data.viewer.organizations.edges;
+            for (let organizationIndex = 0; organizationIndex < organizations.length; organizationIndex++) {
+                const organization = organizations[organizationIndex];
+                if (organization.node != null) {
+                    const organizationLogin = organization.node.name;
+                    const organizationRepos = organization.node.repositories.edges;
+                    for (let repoIndex = 0; repoIndex < organizationRepos.length; repoIndex++) {
+                        const repo = organizationRepos[repoIndex];
+                        repos.push({ owner: organizationLogin, repo });
+                    }
+                }
+            }
+
+            // Process repos - get only mark wiki repos
+            for (let repoIndex = 0; repoIndex < repos.length; repoIndex++) {
+                const repo = repos[repoIndex];
+                if (repo.repo.node.defaultBranchRef.target.tree.entries.find(e => e.name.startsWith('.markwiki'))) {
+                    wikiRepos.push({
+                        owner: repo.owner,
+                        id: repo.repo.node.id,
+                        name: repo.repo.node.name,
+                        url: repo.repo.node.url
+                    });
+                }
+            }
+
+            console.log('Available wikis: ', wikiRepos);
         } catch (error) {
+            console.warn(error);
             // TODO: Log
         }
         // const organization = 'markwiki';
-        // const organizationQuery = `{ organization(login: "${organization}") { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type, } } } } } } } } } }`;
+        //
 
         // const viewerQuery = '{ viewer { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } } } }';
     }
@@ -99,7 +137,7 @@ class GitHubApiService {
     _getClient() {
         return axios.create({
             baseURL: 'https://api.github.com/',
-            timeout: 1000,
+            timeout: 30000,
             headers: {
                 Authorization: `bearer ${AuthService.instance.gitHubToken}`
             }
