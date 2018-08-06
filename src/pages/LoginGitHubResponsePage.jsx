@@ -21,7 +21,9 @@ const LoginGitHubResponsePage = () => {
         <div className="pt-5">
             <div className="text-center">
                 <img src={gitHubLogoLightLarge} alt="GitHub Mark" />
-                <div className="pt-4">{'Logging you in...'}</div>
+                <div className="pt-4">
+                    {'Logging you in...'}
+                </div>
             </div>
         </div>
     );

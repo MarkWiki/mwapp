@@ -35,10 +35,8 @@
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
     "postmerge-bump-patch": "npm version patch",
-    "precommit-lint": "lint-staged",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "precommit": "npm run precommit-lint",
     "postmerge": "npm run postmerge-bump-patch",
     "start-js": "react-app-rewired start",
     "start": "npm-run-all -p start-js watch-css",

@@ -36,8 +36,7 @@ class AuthService {
     }
 
     static async loginCodeGitHubAsync(code, state) {
-        const redirectUrl =
-            StorageService.localStorageGet('loginGitHubSourceUrl') || '/';
+        const redirectUrl = StorageService.localStorageGet('loginGitHubSourceUrl') || '/';
         const checkNonce = StorageService.localStorageGet(
             'loginGitHubNonce'
         ).toString();

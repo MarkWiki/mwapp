@@ -17,8 +17,7 @@ class ProfileViewModel {
     isCurrentUser = false;
 
     constructor(isCurrentUser) {
-        if (typeof isCurrentUser !== 'boolean')
-            throw new Error('Invalid argument type isCurrentUser.');
+        if (typeof isCurrentUser !== 'boolean') throw new Error('Invalid argument type isCurrentUser.');
 
         this.isLoading = true;
         this.isCurrentUser = isCurrentUser;

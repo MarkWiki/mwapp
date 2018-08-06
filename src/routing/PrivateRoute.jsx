@@ -6,17 +6,16 @@ import AuthService from '../services/AuthService';
 const PrivateRoute = ({ component: Component, ...rest }) => (
     <Route
         {...rest}
-        render={matchedProps =>
-            AuthService.instance.isAuthenticated ? (
-                <Component {...matchedProps} />
-            ) : (
-                <Redirect
-                    to={{
-                        pathname: '/login',
-                        state: { from: matchedProps.location }
-                    }}
-                />
-            )
+        render={matchedProps => (AuthService.instance.isAuthenticated ? (
+            <Component {...matchedProps} />
+        ) : (
+            <Redirect
+                to={{
+                    pathname: '/login',
+                    state: { from: matchedProps.location }
+                }}
+            />
+        ))
         }
     />
 );

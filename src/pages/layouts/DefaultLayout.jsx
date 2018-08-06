@@ -1,7 +1,9 @@
 import React from 'react';
 import Helmet from 'react-helmet';
 import PropTypes from 'prop-types';
-import { Alert, Navbar, NavbarBrand, Nav, NavItem, NavLink } from 'reactstrap';
+import {
+    Alert, Navbar, NavbarBrand, Nav, NavItem, NavLink
+} from 'reactstrap';
 import { Link } from 'react-router-dom';
 import { version } from '../../../package.json';
 import mwLightLogo from '../../images/MarkWikiLightLogo240x120.png';

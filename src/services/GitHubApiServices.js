@@ -60,8 +60,7 @@ class GitHubApiService {
             query
         });
 
-        if (response.status !== 200)
-            return this._handleInvalidStatusCode(response);
+        if (response.status !== 200) return this._handleInvalidStatusCode(response);
 
         return response.data;
     }

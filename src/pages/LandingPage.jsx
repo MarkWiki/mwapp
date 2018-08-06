@@ -6,7 +6,9 @@ import AuthService from '../services/AuthService';
 
 const LandingPage = () => (
     <Jumbotron>
-        <h1 className="display-3">{'Hello, world!'}</h1>
+        <h1 className="display-3">
+            {'Hello, world!'}
+        </h1>
         <p className="lead">
             {'Welcome to MarkWiki '}
             <span role="img" aria-label="wave">
@@ -14,7 +16,9 @@ const LandingPage = () => (
             </span>
         </p>
         <hr className="my-2" />
-        <p>{'Markdown + Wiki + Version Control'}</p>
+        <p>
+            {'Markdown + Wiki + Version Control'}
+        </p>
         <p
             className={classnames(
                 'lead',
@@ -22,7 +26,9 @@ const LandingPage = () => (
             )}
         >
             <Link to="/login">
-                <Button color="secondary">{'Start using'}</Button>
+                <Button color="secondary">
+                    {'Start using'}
+                </Button>
             </Link>
         </p>
     </Jumbotron>
