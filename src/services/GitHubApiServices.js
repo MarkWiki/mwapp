@@ -5,14 +5,17 @@ class GitHubApiService {
     static instance;
 
     async getUserWikisAsync() {
-        const currentUserOrganizationsQuery = '{ viewer { organizations(first: 100) { edges { node { login } } } } }';
+        try {
+            const currentUserOrganizationsQuery = '{ viewer { organizations(first: 100) { edges { node { login } } } } }';
 
-        const currentUserOrganizationsResult = await this._graphRequestAsync(currentUserOrganizationsQuery);
-        if (currentUserOrganizationsResult == null) return;
-        console.log(currentUserOrganizationsResult);
-        const organizationsLogins = currentUserOrganizationsResult.data.viewer.organizations.edges.map(edge => edge.node.login);
-        console.log(organizationsLogins);
-
+            const currentUserOrganizationsResult = await this._graphRequestAsync(currentUserOrganizationsQuery);
+            if (currentUserOrganizationsResult == null) return;
+            console.log(currentUserOrganizationsResult);
+            const organizationsLogins = currentUserOrganizationsResult.data.viewer.organizations.edges.map(edge => edge.node.login);
+            console.log(organizationsLogins);
+        } catch (error) {
+            // TODO: Log
+        }
         // const organization = 'markwiki';
         // const organizationQuery = `{ organization(login: "${organization}") { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type, } } } } } } } } } }`;
 
