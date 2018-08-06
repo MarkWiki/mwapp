@@ -1,6 +1,6 @@
 {
   "name": "mwapp",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",

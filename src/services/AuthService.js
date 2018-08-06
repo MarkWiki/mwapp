@@ -19,7 +19,7 @@ class AuthService {
 
     static navigateOauthGitHub(fromPathname) {
         const state = new Date().getTime();
-        const scopes = 'user,public_repo';
+        const scopes = 'user,repo,public_repo,user:email,read:org';
         const clientId = '815b10ee06332853b128';
         const redirectUrl = 'https://markwiki.com/login/github';
         const newLocation = `https://github.com/login/oauth/authorize?client_id=${encodeURI(

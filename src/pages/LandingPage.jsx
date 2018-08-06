@@ -3,6 +3,7 @@ import { Button, Jumbotron } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import AuthService from '../services/AuthService';
+import GitHubApiService from '../services/GitHubApiServices';
 
 const LandingPage = () => (
     <Jumbotron>
@@ -31,6 +32,12 @@ const LandingPage = () => (
                 </Button>
             </Link>
         </p>
+        <div>
+            {'Wikis'}
+            <div>
+                {GitHubApiService.instance.getUserWikisAsync() && 'Loading'}
+            </div>
+        </div>
     </Jumbotron>
 );
 

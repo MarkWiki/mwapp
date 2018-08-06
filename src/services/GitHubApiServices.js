@@ -4,6 +4,21 @@ import AuthService from './AuthService';
 class GitHubApiService {
     static instance;
 
+    async getUserWikisAsync() {
+        const currentUserOrganizationsQuery = '{ viewer { organizations(first: 100) { edges { node { login } } } } }';
+
+        const currentUserOrganizationsResult = await this._graphRequestAsync(currentUserOrganizationsQuery);
+        if (currentUserOrganizationsResult == null) return;
+        console.log(currentUserOrganizationsResult);
+        const organizationsLogins = currentUserOrganizationsResult.data.viewer.organizations.edges.map(edge => edge.node.login);
+        console.log(organizationsLogins);
+
+        // const organization = 'markwiki';
+        // const organizationQuery = `{ organization(login: "${organization}") { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type, } } } } } } } } } }`;
+
+        // const viewerQuery = '{ viewer { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } } } }';
+    }
+
     async getUserProfile(userName) {
         if (!AuthService.instance.isAuthenticated) return null;
 
@@ -61,13 +76,21 @@ class GitHubApiService {
         });
 
         if (response.status !== 200) return this._handleInvalidStatusCode(response);
+        if (response.data.data == null) return this._handleGraphError(response.data.errors);
 
         return response.data;
+    }
+
+    _handleGraphError(error) {
+        console.warn('Got error from graph API', error);
+        // TODO: Log
+        return null;
     }
 
     _handleInvalidStatusCode(response) {
         console.warn(`Got invalid response code: ${response.status}`, response);
         // TODO: Log
+        return null;
     }
 
     _getClient() {
