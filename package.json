@@ -34,10 +34,10 @@
   },
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
-    "postmerge-bump-patch": "npm version patch",
+    "precommit-bump-patch": "npm --no-git-tag-version version patch",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
-    "postmerge": "npm run postmerge-bump-patch",
+    "precommit": "npm run precommit-bump-patch",
     "start-js": "react-app-rewired start",
     "start": "npm-run-all -p start-js watch-css",
     "build-js": "react-app-rewired build",
