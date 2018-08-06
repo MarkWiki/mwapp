@@ -1,6 +1,6 @@
 {
   "name": "mwapp",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -34,7 +34,7 @@
   },
   "scripts": {
     "analyze": "source-map-explorer build/static/js/main.*",
-    "precommit-bump-patch": "npm --no-git-tag-version version patch",
+    "precommit-bump-patch": "npm --no-git-tag-version version patch && git add package.json",
     "build-css": "node-sass-chokidar src/ -o src/",
     "watch-css": "npm run build-css && node-sass-chokidar src/ -o src/ --watch --recursive",
     "precommit": "npm run precommit-bump-patch",
