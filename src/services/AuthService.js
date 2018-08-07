@@ -14,7 +14,7 @@ class AuthService {
     tryAuthenticate() {
         if (this.gitHubToken != null) return;
 
-        this.gitHubToken = StorageService.localStorageGet('gitHubToken');
+        this.gitHubToken = StorageService.permanentGet('gitHubToken');
     }
 
     static navigateOauthGitHub(fromPathname) {
@@ -29,15 +29,15 @@ class AuthService {
         )}&state=${encodeURI(state)}`;
 
         // Save return state
-        StorageService.localStorageSet('loginGitHubSourceUrl', fromPathname);
-        StorageService.localStorageSet('loginGitHubNonce', state);
+        StorageService.permanentSet('loginGitHubSourceUrl', fromPathname);
+        StorageService.permanentSet('loginGitHubNonce', state);
 
         window.location = newLocation;
     }
 
     static async loginCodeGitHubAsync(code, state) {
-        const redirectUrl = StorageService.localStorageGet('loginGitHubSourceUrl') || '/';
-        const checkNonce = StorageService.localStorageGet(
+        const redirectUrl = StorageService.permanentGet('loginGitHubSourceUrl') || '/';
+        const checkNonce = StorageService.permanentGet(
             'loginGitHubNonce'
         ).toString();
 
@@ -50,7 +50,7 @@ class AuthService {
         );
         const accessToken = response.data.access_token;
 
-        StorageService.localStorageSet('gitHubToken', accessToken);
+        StorageService.permanentSet('gitHubToken', accessToken);
 
         window.location = redirectUrl;
     }

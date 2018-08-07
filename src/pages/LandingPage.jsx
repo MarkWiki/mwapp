@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Jumbotron } from 'reactstrap';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
+import { observer } from 'mobx-react';
 import AuthService from '../services/AuthService';
 import GitHubApiService from '../services/GitHubApiServices';
 
@@ -34,11 +35,9 @@ const LandingPage = () => (
         </p>
         <div>
             {'Wikis'}
-            <div>
-                {GitHubApiService.instance.getUserWikisAsync() && 'Loading'}
-            </div>
+            <div />
         </div>
     </Jumbotron>
 );
 
-export default LandingPage;
+export default observer(LandingPage);

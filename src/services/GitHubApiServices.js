@@ -10,26 +10,85 @@ class GitHubApiService {
         try {
             const wikiRepos = [];
 
-            const organizationQuery = '{ viewer { login, repositories(first: 100) { edges { node { id, name, url, defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } }, organizations(first: 100) { edges { node { id, name, url, repositories(first: 100) { edges { node { name, defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } } } } } } }';
+            const organizationQuery = `
+              query GetAllRepoRootFiles {
+                viewer {
+                  login
+                  repositories(first: 100 isFork: false) {
+                    edges {
+                      node {
+                        ...repoFragment
+                      }
+                    }
+                  }
+                  organizations(first: 100) {
+                    edges {
+                      node {
+                        id
+                        name
+                        url
+                        repositories(first: 100 isFork: false) {
+                          edges {
+                            node {
+                              ...repoFragment
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              
+              fragment repoFragment on Repository {
+                id
+                name
+                url
+                defaultBranchRef {
+                  target {
+                    ... on Commit {
+                      tree {
+                        entries {
+                          name
+                          mode
+                          type
+                        }
+                      }
+                    }
+                  }
+                }
+              }`;
             const result = await this._graphRequestAsync(organizationQuery);
 
             const repos = [];
 
             // Process user repos
             const userRepos = result.data.viewer.repositories.edges;
-            for (let userRepositoryIndex = 0; userRepositoryIndex < userRepos.length; userRepositoryIndex++) {
+            for (
+                let userRepositoryIndex = 0;
+                userRepositoryIndex < userRepos.length;
+                userRepositoryIndex++
+            ) {
                 const userRepo = userRepos[userRepositoryIndex];
                 repos.push({ owner: result.data.viewer.login, repo: userRepo });
             }
 
             // Process organization repos
             const organizations = result.data.viewer.organizations.edges;
-            for (let organizationIndex = 0; organizationIndex < organizations.length; organizationIndex++) {
+            for (
+                let organizationIndex = 0;
+                organizationIndex < organizations.length;
+                organizationIndex++
+            ) {
                 const organization = organizations[organizationIndex];
                 if (organization.node != null) {
                     const organizationLogin = organization.node.name;
                     const organizationRepos = organization.node.repositories.edges;
-                    for (let repoIndex = 0; repoIndex < organizationRepos.length; repoIndex++) {
+                    for (
+                        let repoIndex = 0;
+                        repoIndex < organizationRepos.length;
+                        repoIndex++
+                    ) {
                         const repo = organizationRepos[repoIndex];
                         repos.push({ owner: organizationLogin, repo });
                     }
@@ -39,7 +98,11 @@ class GitHubApiService {
             // Process repos - get only mark wiki repos
             for (let repoIndex = 0; repoIndex < repos.length; repoIndex++) {
                 const repo = repos[repoIndex];
-                if (repo.repo.node.defaultBranchRef.target.tree.entries.find(e => e.name.startsWith('.markwiki'))) {
+                if (
+                    repo.repo.node.defaultBranchRef.target.tree.entries.find(
+                        e => e.name.startsWith('.markwiki')
+                    )
+                ) {
                     wikiRepos.push({
                         owner: repo.owner,
                         id: repo.repo.node.id,
@@ -49,15 +112,12 @@ class GitHubApiService {
                 }
             }
 
-            console.log('Available wikis: ', wikiRepos);
+            return wikiRepos;
         } catch (error) {
-            console.warn(error);
             // TODO: Log
+            console.warn(error);
+            return [];
         }
-        // const organization = 'markwiki';
-        //
-
-        // const viewerQuery = '{ viewer { repositories(first: 100) { edges { node { defaultBranchRef { target { ... on Commit { tree { entries { name, mode, type } } } } } } } } } }';
     }
 
     async getUserProfile(userName) {
