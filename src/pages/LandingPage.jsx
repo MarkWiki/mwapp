@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import classnames from 'classnames';
 import { observer } from 'mobx-react';
 import AuthService from '../services/AuthService';
-import GitHubApiService from '../services/GitHubApiServices';
 
 const LandingPage = () => (
     <Jumbotron>
