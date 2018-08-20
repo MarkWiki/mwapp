@@ -17,6 +17,16 @@ class AuthService {
         this.gitHubToken = StorageService.permanentGet('gitHubToken');
     }
 
+    tryRenewToken() {
+        AuthService.clearOauthGitHub();
+        AuthService.navigateOauthGitHub(window.location.href);
+    }
+
+    static clearOauthGitHub() {
+        StorageService.permanentSet('gitHubToken', null);
+        this.gitHubToken = null;
+    }
+
     static navigateOauthGitHub(fromPathname) {
         const state = new Date().getTime();
         const scopes = 'user,repo,public_repo,user:email,read:org';
@@ -50,6 +60,8 @@ class AuthService {
         );
         const accessToken = response.data.access_token;
 
+        StorageService.permanentSet('loginGitHubSourceUrl', null);
+        StorageService.permanentSet('loginGitHubNonce', null);
         StorageService.permanentSet('gitHubToken', accessToken);
 
         window.location = redirectUrl;

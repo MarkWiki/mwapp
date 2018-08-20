@@ -165,6 +165,8 @@ class GitHubApiService {
                 email: profileEmail
             };
         } catch (error) {
+            if (error.status === 401) AuthService.instance.tryRenewToken();
+
             // TODO: Log
             console.warn('Failed to retrieve current user profile.', error);
             return null;
@@ -172,14 +174,18 @@ class GitHubApiService {
     }
 
     async _graphRequestAsync(query) {
-        const response = await this._getClient().post('/graphql', {
-            query
-        });
+        try {
+            const response = await this._getClient().post('/graphql', {
+                query
+            });
 
-        if (response.status !== 200) return this._handleInvalidStatusCode(response);
-        if (response.data.data == null) return this._handleGraphError(response.data.errors);
+            if (response.data.data == null) return this._handleGraphError(response.data.errors);
 
-        return response.data;
+            return response.data;
+        } catch (error) {
+            if (error.response.status !== 200) return this._handleInvalidStatusCode(error.response);
+            return error;
+        }
     }
 
     _handleGraphError(error) {
@@ -190,6 +196,9 @@ class GitHubApiService {
 
     _handleInvalidStatusCode(response) {
         console.warn(`Got invalid response code: ${response.status}`, response);
+
+        if (response.status === 401) AuthService.instance.tryRenewToken();
+
         // TODO: Log
         return null;
     }

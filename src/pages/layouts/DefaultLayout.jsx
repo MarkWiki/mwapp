@@ -21,7 +21,7 @@ const ProfileNavItemLoading = () => (
                 alt="GitHub Mark"
             />
         </span>
-        {'Loggin you in...'}
+        {'Logging you in...'}
     </div>
 );
 
