@@ -1,6 +1,6 @@
 {
   "name": "mwapp",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
@@ -42,9 +42,7 @@
     "start": "npm-run-all -p start-js watch-css",
     "build-js": "react-app-rewired build",
     "build-static": "react-snapshot",
-    "build": "npm-run-all build-css build-js build-static",
-    "test": "react-app-rewired test --env=jsdom",
-    "eject": "react-app-rewired eject"
+    "build": "npm-run-all build-css build-js build-static"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [

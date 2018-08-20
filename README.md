@@ -35,6 +35,20 @@ Your app is ready to be deployed!
 
 See the section about [deployment](#deployment) for more information.
 
+### CI and CD
+
+TravisCI is configured to build every branch.
+
+`master` is automatically deployed to production and hosted on Netlify.
+
+### Development notes
+
+- this is create-react-app app
+- using mobx.js for state management (CRA scripts are rewired to support decorators)
+- using react-router for routing
+- using react-snapshot and react-helmet for static page generation (pre-rendering)
+- using Bootstrap 4 as CSS base
+
 ## Roadmap (v1)
 
 General

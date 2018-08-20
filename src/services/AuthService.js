@@ -49,10 +49,10 @@ class AuthService {
         const redirectUrl = StorageService.permanentGet('loginGitHubSourceUrl') || '/';
         const checkNonce = StorageService.permanentGet(
             'loginGitHubNonce'
-        ).toString();
+        );
 
-        if (checkNonce !== state) {
-            throw new Error('Login GitHub: Nonce not matching.');
+        if (checkNonce == null || checkNonce.toString() !== state) {
+            throw new Error('Login GitHub: Nonce not matching or non existent.');
         }
 
         const response = await axios.get(
